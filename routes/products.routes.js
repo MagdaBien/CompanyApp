@@ -47,13 +47,13 @@ router.put("/products/:id", async (req, res) => {
   const { name, client } = req.body;
 
   try {
-    const dep = await Product.findById(req.params.id);
+    const dep = await Product.findOneAndUpdate(
+      { _id: req.params.id },
+      { $set: { name: name, client: client } },
+      { returnDocument: "after" }
+    );
     if (dep) {
-      await Product.updateOne(
-        { _id: req.params.id },
-        { $set: { name: name, client: client } }
-      );
-      res.json({ message: "OK" });
+      res.json(dep);
     } else res.status(404).json({ message: "Not found..." });
   } catch (err) {
     res.status(500).json({ message: err });
@@ -62,10 +62,9 @@ router.put("/products/:id", async (req, res) => {
 
 router.delete("/products/:id", async (req, res) => {
   try {
-    const dep = await Product.findById(req.params.id);
+    const dep = await Product.findOneAndDelete({ _id: req.params.id });
     if (dep) {
-      await Product.deleteOne({ _id: req.params.id });
-      res.json({ message: "OK" });
+      res.json(dep);
     } else res.status(404).json({ message: "Not found..." });
   } catch (err) {
     res.status(500).json({ message: err });
