@@ -1,4 +1,6 @@
 const Employee = require("../employee.model");
+const Department = require("../department.model");
+
 const expect = require("chai").expect;
 const mongoose = require("mongoose");
 
@@ -172,6 +174,42 @@ describe("Employee", () => {
 
     afterEach(async () => {
       await Employee.deleteMany();
+    });
+  });
+
+  // ------------------- CONNECTING DATA COLLECTIONS-----------------------------------------
+  describe("Connecting data collections", () => {
+    before(async () => {
+      const testDep = new Department({
+        _id: "65f758dd25e4bff412f532cb",
+        name: "Marketing",
+      });
+      await testDep.save();
+
+      const testEmpl = new Employee({
+        firstName: "Joe",
+        lastName: "Red",
+        department: "65f758dd25e4bff412f532cb",
+      });
+      await testEmpl.save();
+    });
+
+    it("should return proper department name with findOne method", async () => {
+      const employee = await Employee.findOne({
+        firstName: "Joe",
+        lastName: "Red",
+      }).populate("department");
+      const expectedFirstName = "Joe";
+      const expectedLastName = "Red";
+      const expectedDepartment = "Marketing";
+      expect(employee.firstName).to.be.equal(expectedFirstName);
+      expect(employee.lastName).to.be.equal(expectedLastName);
+      expect(employee.department.name).to.be.equal(expectedDepartment);
+    });
+
+    after(async () => {
+      await Employee.deleteMany();
+      await Department.deleteMany();
     });
   });
 });
